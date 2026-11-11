@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#080713">
+<title>ARYA MUSIC PLAYER PRO</title>
+<style>
+:root{--a:#9b4dff;--g:#a855f7;--bg:#080713}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:#fff;font-family:Arial,sans-serif;padding:18px 12px;overflow-x:hidden}
+body.red{--a:#ff2858;--g:#ff2858}
+#bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;opacity:.2;z-index:-3}
+.shade{position:fixed;inset:0;background:linear-gradient(130deg,#080713e8,#100821e8);z-index:-2}
+.glow{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 25%,var(--g),transparent 65%);opacity:.2;z-index:-1}
+.panel{width:min(100%,480px);margin:auto;padding:22px;border:1px solid var(--a);border-radius:26px;background:#100d22ef;box-shadow:0 0 25px #8b35ff55,inset 0 0 25px #8b35ff12;backdrop-filter:blur(14px);animation:in .5s ease}
+@keyframes in{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+.hidden{display:none!important}
+.video-frame{height:175px;border-radius:18px;overflow:hidden;border:1px solid var(--a);margin-bottom:22px;box-shadow:0 0 22px #933cff66}
+.video-frame video{width:100%;height:100%;object-fit:cover}
+h1{text-align:center;font-size:25px;letter-spacing:3px;text-shadow:0 0 15px var(--a);margin:8px 0}
+.tag{text-align:center;color:#cbb5e9;font-size:10px;letter-spacing:4px;margin-bottom:20px}
+.by{text-align:center;color:#e1c9ff;letter-spacing:4px;font-size:12px;font-weight:bold;margin:12px 0 20px}
+.tabs,.row{display:flex;gap:10px}
+.tabs button{flex:1}
+.field{margin:14px 0}
+.field label,.small-label{display:block;color:#d8c5f3;font-size:11px;letter-spacing:2px;font-weight:bold;margin-bottom:8px}
+input,textarea{width:100%;padding:14px;border-radius:12px;border:1px solid #514568;background:#0b0918;color:white;outline:none}
+input:focus,textarea:focus{border-color:var(--a);box-shadow:0 0 12px #933cff55}
+button,.pick{border:1px solid var(--a);background:#211632;color:white;border-radius:12px;padding:13px;font-weight:bold;cursor:pointer;transition:.18s}
+button:active{transform:scale(.96)}
+button.primary,.pick{background:linear-gradient(100deg,#6535ff,#b13dff);box-shadow:0 0 15px #933cff55}
+.tabs button.active{background:linear-gradient(100deg,#6535ff,#b13dff)}
+.wide{width:100%;margin-top:12px}
+.outline{background:transparent}
+.link{border:0;background:none;text-decoration:underline;color:#d9c7f5;font-size:12px}
+.footer{text-align:center;color:#8f829f;font-size:10px;letter-spacing:2px;margin-top:25px}
+#msg{text-align:center;min-height:18px;color:#f3dfff;font-size:12px;margin-top:12px}
+.player-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.player-head .by{margin:8px 0}
+.pill{font-size:10px;color:#d7c1f6;border:1px solid #ffffff2b;padding:7px 10px;border-radius:20px}
+.disc-wrap{position:relative;width:205px;height:205px;margin:16px auto 12px;display:grid;place-items:center}
+.disc{width:180px;height:180px;border-radius:50%;display:grid;place-items:center;background:repeating-radial-gradient(circle,#111 0 5px,#242035 6px 9px,#111 10px 13px);border:5px solid #302044;box-shadow:0 0 0 5px #9b4dff55,0 0 32px var(--a);position:relative}
+.disc:before{content:"";position:absolute;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,#f5d9ff 0 5%,#9b4dff 8% 35%,#241338 38%);border:3px solid #d4aaff}
+.disc:after{content:"ARYA";position:absolute;font-size:10px;font-weight:bold;color:white;z-index:1}
+.disc.playing{animation:spin 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#eq{width:100%;height:65px;margin:8px 0;filter:drop-shadow(0 0 5px var(--a))}
+.track{text-align:center;font-weight:bold;overflow-wrap:anywhere;margin:8px 0}
+.sub{text-align:center;color:#b9aecb;font-size:11px;line-height:1.5}
+.progress{display:flex;align-items:center;gap:8px;margin:14px 0;color:#bcaed0;font-size:10px}
+.progress input{padding:0;accent-color:var(--a)}
+.controls{display:flex;gap:9px;margin:12px 0}
+.controls button{flex:1;font-size:15px}
+.controls .big{flex:1.3;background:linear-gradient(100deg,#6535ff,#b13dff)}
+.pick{display:block;text-align:center;margin:14px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.grid button{font-size:11px}
+.section{border:1px solid #ffffff20;background:#ffffff08;border-radius:16px;padding:13px;margin-top:14px}
+.section h3{font-size:12px;letter-spacing:2px;color:#e0caff;margin:0 0 10px}
+.list{list-style:none;padding:0;margin:0;max-height:180px;overflow:auto}
+.list li{display:flex;gap:7px;align-items:center;padding:9px;border-bottom:1px solid #ffffff16;font-size:11px}
+.list li .songname{flex:1;overflow-wrap:anywhere;cursor:pointer}
+.list li.active{color:#e4baff;background:#ffffff0b}
+.list button{padding:6px 9px;font-size:10px}
+.lyrics{white-space:pre-wrap;min-height:75px;text-align:center;color:#e5d5ff;font-size:13px;line-height:1.7;padding:10px}
+.timer-row{display:flex;gap:8px}
+.timer-row input{min-width:0}
+.visual{position:fixed;inset:0;background:#070510f7;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+.visual canvas{width:100%;height:65vh}
+.visual button{width:min(90%,300px)}
+.hint{font-size:10px;color:#aa9cbd;line-height:1.5}
+</style>
+</head>
+<body>
+<video id="bg" autoplay muted loop playsinline></video>
+<div class="shade"></div><div class="glow"></div>
+
+<main class="panel">
+<section id="login">
+<div class="video-frame"></div>
+<h1>WELCOME BACK</h1>
+<div class="tag">YOUR MUSIC EXPERIENCE</div>
+<div class="by">✦ BY ARYA ✦</div>
+<div class="tabs">
+<button class="active" id="loginTab" onclick="show('login')">LOGIN</button>
+<button id="registerTab" onclick="show('register')">DAFTAR</button>
+</div>
+<div class="field"><label>USERNAME</label><input id="lu" placeholder="Enter username"></div>
+<div class="field"><label>PASSWORD</label><input id="lp" type="password" placeholder="Enter password"></div>
+<button class="primary wide" onclick="login()">LOGIN NOW</button>
+<button class="link wide" onclick="show('forgot')">LUPA PASSWORD?</button>
+<div class="footer">ARYA MUSIC PLAYER PRO</div>
+</section>
+
+<section id="register" class="hidden">
+<h1>CREATE ACCOUNT</h1><div class="tag">JOIN THE EXPERIENCE</div>
+<div class="field"><label>USERNAME</label><input id="ru" placeholder="Create username"></div>
+<div class="field"><label>PASSWORD</label><input id="rp" type="password" placeholder="Create password"></div>
+<div class="field"><label>CONFIRM PASSWORD</label><input id="rc" type="password" placeholder="Confirm password"></div>
+<button class="primary wide" onclick="register()">CREATE ACCOUNT</button>
+<button class="wide outline" onclick="show('login')">BACK TO LOGIN</button>
+</section>
+
+<section id="forgot" class="hidden">
+<h1>RESET PASSWORD</h1>
+<div class="field"><label>USERNAME</label><input id="fu" placeholder="Registered username"></div>
+<div class="field"><label>NEW PASSWORD</label><input id="fp" type="password" placeholder="New password"></div>
+<div class="field"><label>CONFIRM PASSWORD</label><input id="fc" type="password" placeholder="Confirm password"></div>
+<button class="primary wide" onclick="resetPass()">SAVE PASSWORD</button>
+<button class="wide outline" onclick="show('login')">BACK</button>
+<p class="hint">Akun demo tersimpan lokal di perangkat ini.</p>
+</section>
+
+<section id="music" class="hidden">
+<div class="player-head"><span class="pill">● PLAYER ONLINE</span><span class="pill">PRO EDITION</span></div>
+<div class="by">✦ MUSIC PLAYER BY ARYA ✦</div>
+<h1>NOW PLAYING</h1>
+<div class="disc-wrap"><div class="disc" id="disc"></div></div>
+<canvas id="eq" width="420" height="90"></canvas>
+<div class="track" id="track">Belum ada musik</div>
+<div class="sub" id="status">Pilih musik dari HP untuk mulai</div>
+<audio id="audio" preload="metadata"></audio>
+<div class="progress">
+<span id="current">0:00</span>
+<input id="seek" type="range" min="0" max="1000" value="0">
+<span id="duration">0:00</span>
+</div>
+<label class="pick" for="files">＋ PILIH MUSIK DARI HP</label>
+<input id="files" type="file" accept="audio/*" multiple hidden>
+<div class="controls">
+<button onclick="prev()">⏮</button>
+<button class="big" id="play" onclick="togglePlay()">▶ PLAY</button>
+<button onclick="next()">⏭</button>
+</div>
+<div class="grid">
+<button id="shuffle" onclick="toggleShuffle()">⇄ SHUFFLE OFF</button>
+<button id="repeat" onclick="toggleRepeat()">↻ REPEAT OFF</button>
+<button id="fav" onclick="toggleFav()">♡ FAVORITE</button>
+<button onclick="openVisual()">▥ FULLSCREEN VISUALIZER</button>
+</div>
+
+<div class="section">
+<h3>♫ PLAYLIST MANAGER</h3>
+<div class="row">
+<button style="flex:1" onclick="sortSongs()">SORT A-Z</button>
+<button style="flex:1" onclick="clearPlaylist()">CLEAR LIST</button>
+</div>
+<ul class="list" id="playlist"></ul>
+</div>
+
+<div class="section"><h3>♡ FAVORITE SONGS</h3><ul class="list" id="favorites"></ul></div>
+<div class="section"><h3>◷ RECENTLY PLAYED</h3><ul class="list" id="recent"></ul></div>
+
+<div class="section">
+<h3>♫ LYRICS</h3>
+<textarea id="lyricInput" rows="3" placeholder="Tempel lirik lagu di sini..."></textarea>
+<button class="wide" onclick="saveLyrics()">SAVE LYRICS</button>
+<div class="lyrics" id="lyrics">Lirik lagu akan tampil di sini.</div>
+</div>
+
+<div class="section">
+<h3>◷ SLEEP TIMER</h3>
+<div class="timer-row">
+<input id="timerMinutes" type="number" min="1" max="600" placeholder="Menit">
+<button onclick="startTimer()">START</button>
+<button onclick="stopTimer()">STOP</button>
+</div>
+<p class="hint" id="timerStatus">Timer belum aktif.</p>
+</div>
+
+<button class="wide outline" onclick="logout()">LOGOUT</button>
+<p class="hint">Musik dipilih dari penyimpanan HP. Lirik diisi manual. Equalizer aktif setelah audio mulai diputar.</p>
+</section>
+<div id="msg"></div>
+</main>
+
+<div id="visual" class="visual hidden">
+<div class="by">✦ ARYA AUDIO VISUALIZER ✦</div>
+<canvas id="fullCanvas"></canvas>
+<button onclick="closeVisual()">CLOSE VISUALIZER ✕</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let songs=[],index=0,shuffle=false,repeat=false;
+let favorites=JSON.parse(localStorage.getItem('arya_favs')||'[]');
+let recent=JSON.parse(localStorage.getItem('arya_recent')||'[]');
+let lyricsMap=JSON.parse(localStorage.getItem('arya_lyrics')||'{}');
+let ctx=null,analyser=null,srcNode=null,raf=0,timer=null;
+
+function users(){try{return JSON.parse(localStorage.getItem('arya_music_users')||'{}')}catch(e){return {}}}
+function say(t){$('msg').textContent=t}
+
+function show(id){
+['login','register','forgot','music'].forEach(x=>$(x).classList.add('hidden'));
+$(id).classList.remove('hidden');
+document.body.classList.toggle('red',id==='register');
+$('loginTab').classList.toggle('active',id==='login');
+$('registerTab').classList.toggle('active',id==='register');
+say('');
+}
+
+function register(){
+let u=$('ru').value.trim(),p=$('rp').value,c=$('rc').value,d=users();
+if(!u||!p||!c)return say('Lengkapi semua data.');
+if(p.length<4)return say('Password minimal 4 karakter.');
+if(p!==c)return say('Konfirmasi password tidak sama.');
+if(d[u])return say('Username sudah digunakan.');
+d[u]=p;
+localStorage.setItem('arya_music_users',JSON.stringify(d));
+$('lu').value=u;show('login');say('Akun berhasil dibuat.');
+}
+
+function login(){
+let u=$('lu').value.trim(),p=$('lp').value;
+if(!u||users()[u]!==p)return say('Username atau password salah.');
+show('music');renderAll();
+}
+
+function resetPass(){
+let u=$('fu').value.trim(),p=$('fp').value,c=$('fc').value,d=users();
+if(!d[u]||p.length<4||p!==c)return say('Periksa username dan password baru.');
+d[u]=p;
+localStorage.setItem('arya_music_users',JSON.stringify(d));
+$('lu').value=u;show('login');say('Password berhasil diganti.');
+}
+
+function logout(){
+$('audio').pause();$('disc').classList.remove('playing');
+show('login');$('lp').value='';
+}
+
+$('files').addEventListener('change',e=>{
+[...e.target.files].forEach(f=>songs.push({name:f.name,url:URL.createObjectURL(f),file:f}));
+renderAll();
+if(songs.length)load(0,false);
+e.target.value='';
+});
+
+function fmt(t){if(!isFinite(t))return'0:00';return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')}
+
+function renderList(id,arr,kind){
+$(id).innerHTML='';
+arr.forEach((s,n)=>{
+let li=document.createElement('li'),name=document.createElement('span');
+name.className='songname';name.textContent=(n+1)+'. '+s.name;
+name.onclick=()=>{let i=songs.indexOf(s);if(i>=0)load(i,true)};
+li.append(name);
+if(kind==='playlist'){
+let del=document.createElement('button');del.textContent='✕';
+del.onclick=()=>removeSong(songs.indexOf(s));li.append(del);
+}
+$(id).append(li);
+});
+}
+
+function renderAll(){
+renderList('playlist',songs,'playlist');
+renderList('favorites',favorites.map(n=>songs.find(s=>s.name===n)).filter(Boolean),'fav');
+renderList('recent',recent.map(n=>songs.find(s=>s.name===n)).filter(Boolean),'recent');
+}
+
+function load(i,auto=false){
+if(!songs.length)return;
+index=(i+songs.length)%songs.length;
+$('audio').src=songs[index].url;
+$('track').textContent=songs[index].name;
+$('status').textContent='Track '+(index+1)+' dari '+songs.length;
+let n=songs[index].name;
+recent=[n,...recent.filter(x=>x!==n)].slice(0,12);
+localStorage.setItem('arya_recent',JSON.stringify(recent));
+$('lyricInput').value=lyricsMap[n]||'';
+$('lyrics').textContent=lyricsMap[n]||'Lirik belum ditambahkan.';
+updateFav();renderAll();
+if(auto)playAudio();
+}
+
+function removeSong(i){
+if(i<0)return;
+songs[i].url&&URL.revokeObjectURL(songs[i].url);
+songs.splice(i,1);
+if(!songs.length){index=0;$('audio').removeAttribute('src');$('track').textContent='Belum ada musik'}
+else{index=Math.min(index,songs.length-1);load(index)}
+renderAll();
+}
+
+function clearPlaylist(){
+songs.forEach(s=>URL.revokeObjectURL(s.url));
+songs=[];index=0;$('audio').pause();$('audio').removeAttribute('src');
+$('track').textContent='Belum ada musik';renderAll();
+}
+
+function sortSongs(){
+songs.sort((a,b)=>a.name.localeCompare(b.name));
+renderAll();say('Playlist diurutkan A-Z.');
+}
+
+function setupAudio(){
+if(ctx)return;
+let AC=window.AudioContext||window.webkitAudioContext;
+if(!AC)return;
+ctx=new AC();analyser=ctx.createAnalyser();analyser.fftSize=128;
+srcNode=ctx.createMediaElementSource($('audio'));
+srcNode.connect(analyser);analyser.connect(ctx.destination);drawEq();
+}
+
+function playAudio(){
+setupAudio();
+if(ctx&&ctx.state==='suspended')ctx.resume();
+$('audio').play().then(()=>{
+$('disc').classList.add('playing');$('play').textContent='Ⅱ PAUSE';
+}).catch(()=>say('Tekan play lagi untuk memulai.'));
+}
+
+function togglePlay(){
+if(!songs.length)return say('Pilih musik terlebih dahulu.');
+if($('audio').paused)playAudio();
+else{$('audio').pause();$('disc').classList.remove('playing');$('play').textContent='▶ PLAY'}
+}
+
+function next(){if(songs.length)load(shuffle?Math.floor(Math.random()*songs.length):index+1,true)}
+function prev(){if(songs.length)load(index-1,true)}
+
+$('audio').addEventListener('ended',()=>{
+if(repeat){$('audio').currentTime=0;playAudio()}
+else if(songs.length>1)next();
+else{$('disc').classList.remove('playing');$('play').textContent='▶ PLAY'}
+});
+
+$('audio').addEventListener('timeupdate',()=>{
+$('current').textContent=fmt($('audio').currentTime);
+$('duration').textContent=fmt($('audio').duration);
+if($('audio').duration)$('seek').value=$('audio').currentTime/$('audio').duration*1000;
+});
+
+$('audio').addEventListener('loadedmetadata',()=>{
+$('duration').textContent=fmt($('audio').duration);
+});
+
+$('seek').addEventListener('input',()=>{
+if($('audio').duration)$('audio').currentTime=$('seek').value/1000*$('audio').duration;
+});
+
+function toggleShuffle(){
+shuffle=!shuffle;
+$('shuffle').textContent='⇄ SHUFFLE '+(shuffle?'ON':'OFF');
+$('shuffle').style.borderColor=shuffle?'#fff':'var(--a)';
+}
+
+function toggleRepeat(){
+repeat=!repeat;
+$('repeat').textContent='↻ REPEAT '+(repeat?'ON':'OFF');
+$('repeat').style.borderColor=repeat?'#fff':'var(--a)';
+}
+
+function updateFav(){
+let yes=songs[index]&&favorites.includes(songs[index].name);
+$('fav').textContent=yes?'♥ FAVORITED':'♡ FAVORITE';
+}
+
+function toggleFav(){
+if(!songs.length)return;
+let n=songs[index].name;
+if(favorites.includes(n))favorites=favorites.filter(x=>x!==n);
+else favorites.unshift(n);
+localStorage.setItem('arya_favs',JSON.stringify(favorites));
+updateFav();renderAll();
+}
+
+function saveLyrics(){
+if(!songs.length)return say('Pilih lagu dulu.');
+lyricsMap[songs[index].name]=$('lyricInput').value;
+localStorage.setItem('arya_lyrics',JSON.stringify(lyricsMap));
+$('lyrics').textContent=$('lyricInput').value||'Lirik belum ditambahkan.';
+say('Lirik berhasil disimpan.');
+}
+
+function startTimer(){
+stopTimer();
+let m=Number($('timerMinutes').value);
+if(!m||m<1)return say('Masukkan durasi menit.');
+$('timerStatus').textContent='Musik berhenti dalam '+m+' menit.';
+timer=setTimeout(()=>{
+$('audio').pause();$('disc').classList.remove('playing');
+$('play').textContent='▶ PLAY';$('timerStatus').textContent='Sleep timer selesai.';
+},m*60000);
+}
+
+function stopTimer(){
+if(timer)clearTimeout(timer);
+timer=null;$('timerStatus').textContent='Timer belum aktif.';
+}
+
+function drawEq(){
+let c=$('eq'),g=c.getContext('2d');
+let data=new Uint8Array(analyser?analyser.frequencyBinCount:64);
+function frame(){
+raf=requestAnimationFrame(frame);
+g.clearRect(0,0,c.width,c.height);
+if(analyser)analyser.getByteFrequencyData(data);
+let count=32,w=c.width/count;
+for(let i=0;i<count;i++){
+let v=analyser?data[i]||0:(Math.sin(Date.now()/260+i*.7)+1)*10;
+let h=Math.max(3,v/255*c.height);
+let gr=g.createLinearGradient(0,c.height-h,0,c.height);
+gr.addColorStop(0,'#f0b7ff');gr.addColorStop(1,'#742cff');
+g.fillStyle=gr;g.fillRect(i*w+2,c.height-h,w-4,h);
+}
+}
+frame();
+}
+
+function openVisual(){
+$('visual').classList.remove('hidden');drawFull();
+}
+function closeVisual(){
+$('visual').classList.add('hidden');cancelAnimationFrame(window.fullRaf);
+}
+
+function drawFull(){
+let c=$('fullCanvas'),g=c.getContext('2d');
+c.width=innerWidth*devicePixelRatio;c.height=innerHeight*.65*devicePixelRatio;
+let d=new Uint8Array(analyser?analyser.frequencyBinCount:64);
+function f(){
+if($('visual').classList.contains('hidden'))return;
+window.fullRaf=requestAnimationFrame(f);
+g.clearRect(0,0,c.width,c.height);
+if(analyser)analyser.getByteFrequencyData(d);
+let cx=c.width/2,cy=c.height/2,r=Math.min(cx,cy)*.38;
+g.strokeStyle='#a855f7';g.lineWidth=4;
+for(let i=0;i<100;i++){
+let a=i/100*Math.PI*2;
+let v=analyser?d[i%d.length]/255:Math.abs(Math.sin(Date.now()/400+i));
+let len=20+v*100;
+g.beginPath();
+g.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+g.lineTo(cx+Math.cos(a)*(r+len),cy+Math.sin(a)*(r+len));
+g.stroke();
+}
+g.beginPath();g.arc(cx,cy,r,0,Math.PI*2);
+g.strokeStyle='#d9a6ff';g.lineWidth=3;g.stroke();
+}
+f();
+}
+</script>
+</body>
+</html>
