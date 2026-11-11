@@ -1,0 +1,41 @@
+
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract project
+        run: |
+          unzip -q MUSIC_PLAYER_BY_ARYA_LOGIN_VIDEO.zip -d extracted
+
+      - name: Build APK
+        run: |
+          cd extracted/Anime_Login_By_Arya
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MUSIC-PLAYER-BY-ARYA
+          path: extracted/Anime_Login_By_Arya/app/build/outputs/apk/debug/app-debug.apk
+          
